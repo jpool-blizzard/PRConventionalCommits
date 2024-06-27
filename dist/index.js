@@ -5756,17 +5756,6 @@ var request = withDefaults(import_endpoint.endpoint, {
 
 /***/ }),
 
-/***/ 8912:
-/***/ ((module) => {
-
-
-module.exports = function(val) {
-  return Array.isArray(val) ? val : [val];
-};
-
-
-/***/ }),
-
 /***/ 3682:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
@@ -5948,55 +5937,6 @@ function removeHook(state, name, method) {
 
 /***/ }),
 
-/***/ 4623:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-
-var arrayify = __nccwpck_require__(8912);
-var dotPropGet = (__nccwpck_require__(2042).get);
-
-function compareFunc(prop) {
-  return function(a, b) {
-    var ret = 0;
-
-    arrayify(prop).some(function(el) {
-      var x;
-      var y;
-
-      if (typeof el === 'function') {
-        x = el(a);
-        y = el(b);
-      } else if (typeof el === 'string') {
-        x = dotPropGet(a, el);
-        y = dotPropGet(b, el);
-      } else {
-        x = a;
-        y = b;
-      }
-
-      if (x === y) {
-        ret = 0;
-        return;
-      }
-
-      if (typeof x === 'string' && typeof y === 'string') {
-        ret = x.localeCompare(y);
-        return ret !== 0;
-      }
-
-      ret = x < y ? -1 : 1;
-      return true;
-    });
-
-    return ret;
-  };
-}
-
-module.exports = compareFunc;
-
-
-/***/ }),
-
 /***/ 8932:
 /***/ ((__unused_webpack_module, exports) => {
 
@@ -6020,168 +5960,6 @@ class Deprecation extends Error {
 }
 
 exports.Deprecation = Deprecation;
-
-
-/***/ }),
-
-/***/ 2042:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-
-const isObj = __nccwpck_require__(1389);
-
-const disallowedKeys = [
-	'__proto__',
-	'prototype',
-	'constructor'
-];
-
-const isValidPath = pathSegments => !pathSegments.some(segment => disallowedKeys.includes(segment));
-
-function getPathSegments(path) {
-	const pathArray = path.split('.');
-	const parts = [];
-
-	for (let i = 0; i < pathArray.length; i++) {
-		let p = pathArray[i];
-
-		while (p[p.length - 1] === '\\' && pathArray[i + 1] !== undefined) {
-			p = p.slice(0, -1) + '.';
-			p += pathArray[++i];
-		}
-
-		parts.push(p);
-	}
-
-	if (!isValidPath(parts)) {
-		return [];
-	}
-
-	return parts;
-}
-
-module.exports = {
-	get(object, path, value) {
-		if (!isObj(object) || typeof path !== 'string') {
-			return value === undefined ? object : value;
-		}
-
-		const pathArray = getPathSegments(path);
-		if (pathArray.length === 0) {
-			return;
-		}
-
-		for (let i = 0; i < pathArray.length; i++) {
-			if (!Object.prototype.propertyIsEnumerable.call(object, pathArray[i])) {
-				return value;
-			}
-
-			object = object[pathArray[i]];
-
-			if (object === undefined || object === null) {
-				// `object` is either `undefined` or `null` so we want to stop the loop, and
-				// if this is not the last bit of the path, and
-				// if it did't return `undefined`
-				// it would return `null` if `object` is `null`
-				// but we want `get({foo: null}, 'foo.bar')` to equal `undefined`, or the supplied value, not `null`
-				if (i !== pathArray.length - 1) {
-					return value;
-				}
-
-				break;
-			}
-		}
-
-		return object;
-	},
-
-	set(object, path, value) {
-		if (!isObj(object) || typeof path !== 'string') {
-			return object;
-		}
-
-		const root = object;
-		const pathArray = getPathSegments(path);
-
-		for (let i = 0; i < pathArray.length; i++) {
-			const p = pathArray[i];
-
-			if (!isObj(object[p])) {
-				object[p] = {};
-			}
-
-			if (i === pathArray.length - 1) {
-				object[p] = value;
-			}
-
-			object = object[p];
-		}
-
-		return root;
-	},
-
-	delete(object, path) {
-		if (!isObj(object) || typeof path !== 'string') {
-			return false;
-		}
-
-		const pathArray = getPathSegments(path);
-
-		for (let i = 0; i < pathArray.length; i++) {
-			const p = pathArray[i];
-
-			if (i === pathArray.length - 1) {
-				delete object[p];
-				return true;
-			}
-
-			object = object[p];
-
-			if (!isObj(object)) {
-				return false;
-			}
-		}
-	},
-
-	has(object, path) {
-		if (!isObj(object) || typeof path !== 'string') {
-			return false;
-		}
-
-		const pathArray = getPathSegments(path);
-		if (pathArray.length === 0) {
-			return false;
-		}
-
-		// eslint-disable-next-line unicorn/no-for-loop
-		for (let i = 0; i < pathArray.length; i++) {
-			if (isObj(object)) {
-				if (!(pathArray[i] in object)) {
-					return false;
-				}
-
-				object = object[pathArray[i]];
-			} else {
-				return false;
-			}
-		}
-
-		return true;
-	}
-};
-
-
-/***/ }),
-
-/***/ 1389:
-/***/ ((module) => {
-
-
-
-module.exports = value => {
-	const type = typeof value;
-	return value !== null && (type === 'object' || type === 'function');
-};
 
 
 /***/ }),
@@ -29298,13 +29076,6 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 278:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-module.exports = __nccwpck_require__.p + "4e8ef5f3f2e737783615.js";
-
-/***/ }),
-
 /***/ 9491:
 /***/ ((module) => {
 
@@ -31112,583 +30883,54 @@ function parseParams (str) {
 module.exports = parseParams
 
 
-/***/ }),
-
-/***/ 290:
-/***/ ((__webpack_module__, __webpack_exports__, __nccwpck_require__) => {
-
-__nccwpck_require__.a(__webpack_module__, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
-/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
-/* harmony export */   "Z": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* unused harmony export visibleForTesting */
-/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2186);
-/* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(5438);
-/* harmony import */ var conventional_commits_parser__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(7703);
-/* harmony import */ var conventional_changelog_conventionalcommits__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(97);
-
-
-
-
-
-const options = await (0,conventional_changelog_conventionalcommits__WEBPACK_IMPORTED_MODULE_3__/* ["default"] */ .Z)();
-const parser = new conventional_commits_parser__WEBPACK_IMPORTED_MODULE_2__/* .CommitParser */ .Qs(options.parser);
-
-/**
- * Main function to run the whole process.
- */
-async function run() {
-    const commitDetail = await checkConventionalCommits();
-    await checkTicketNumber();
-    await applyLabel(_actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo, commitDetail);
-}
-
-
-/**
- * Check the conventional commits of the task.
- * Parse the title of the pull request and validate against the task type list.
- * @returns {Promise<Object>} An object with details of the commit: type, scope and whether it's a breaking change.
- */
-async function checkConventionalCommits() {
-    let taskTypesInput = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('task_types');
-    if (!taskTypesInput) {
-        (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed)('Missing required input: task_types');
-        return;
-    }
-    let taskTypeList;
-    try {
-        taskTypeList = JSON.parse(taskTypesInput);
-    } catch (err) {
-        (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed)('Invalid task_types input. Expecting a JSON array.');
-        return;
-    }
-
-    const pr = _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.pull_request;
-
-    if (!parser.options.headerPattern.test(pr.title)) {
-        (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed)(`Malformed pull request title. Must match: ${parser.options.headerPattern}`);
-        return;
-    }
-
-    const commitMessage = (pr.body == null ? pr.title : pr.title + "\n" + pr.body).trim();
-    const titleAst = parser.parse(commitMessage);
-    const cc = {
-        type: titleAst.type ? titleAst.type : '',
-        scope: titleAst.scope ? titleAst.scope : '',
-        breaking: titleAst.notes && titleAst.notes.some(note => note.title === 'BREAKING CHANGE'),
-    };
-    if (!cc.type || !taskTypeList.includes(cc.type)) {
-        (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed)(`Invalid or missing task type: '${cc.type}'. Must be one of: ${taskTypeList.join(', ')}`);
-        return;
-    }
-    return cc;
-}
-
-/**
- * Check the ticket number based on the PR title and a provided regex.
- */
-async function checkTicketNumber() {
-    const ticketKeyRegex = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('ticket_key_regex');
-    if (ticketKeyRegex) {
-        const pr = _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.pull_request;
-        const taskNumberMatch = pr.title.match(new RegExp(ticketKeyRegex));
-        const taskNumber = taskNumberMatch ? taskNumberMatch[0] : '';
-        if (!taskNumber) {
-            (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed)(`Invalid or missing task number: '${taskNumber}'. Must match: ${ticketKeyRegex}`);
-        }
-    }
-}
-/**
- * Apply labels to the pull request based on the details of the commit and any custom labels provided.
- * @param {Object} repo Repository details.
- * @param {Object} commitDetail The object with details of the commit.
- */
-async function applyLabel(repo, commitDetail) {
-    const addLabel = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('add_label');
-    if (addLabel !== undefined && addLabel.toLowerCase() === 'false') {
-        return;
-    }
-    const customLabelsInput = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('custom_labels');
-    let customLabels = {};
-    if (customLabelsInput) {
-        try {
-            customLabels = JSON.parse(customLabelsInput);
-            // Validate that customLabels is an object and all its keys and values are strings
-            if (typeof customLabels !== 'object' || Array.isArray(customLabels) || Object.entries(customLabels).some(([k, v]) => typeof k !== 'string' || typeof v !== 'string')) {
-                (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed)('Invalid custom_labels input. Expecting a JSON object with string keys and values.');
-                return;
-            }
-        } catch (err) {
-            (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed)('Invalid custom_labels input. Unable to parse JSON.');
-            return;
-        }
-    }
-    await updateLabels(repo, commitDetail, customLabels);
-}
-
-/**
- * Update labels on the pull request.
- * @param {Object} repo Repository details.
- * @param {Object} commitDetail The object with details of the commit.
- * @param {Object} customLabels Custom label mapping.
- */
-async function updateLabels(repo, commitDetail, customLabels) {
-    const pr = _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.pull_request;
-    const token = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('token');
-    const octokit = (0,_actions_github__WEBPACK_IMPORTED_MODULE_1__.getOctokit)(token);
-    const currentLabelsResult = await octokit.rest.issues.listLabelsOnIssue({
-        owner: repo.owner,
-        repo: repo.repo,
-        issue_number: pr.number
-    });
-    const currentLabels = currentLabelsResult.data.map(label => label.name);
-    let taskTypesInput = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('task_types');
-    let taskTypeList = JSON.parse(taskTypesInput);
-    const managedLabels = taskTypeList.concat(['breaking change']);
-    // Include customLabels keys in managedLabels, if any
-    Object.values(customLabels).forEach(label => {
-        if (!managedLabels.includes(label)) {
-            managedLabels.push(label);
-        }
-    });
-    let newLabels = [customLabels[commitDetail.type] ? customLabels[commitDetail.type] : commitDetail.type];
-    const breakingChangeLabel = 'breaking change';
-    if (commitDetail.breaking && !newLabels.includes(breakingChangeLabel)) {
-        newLabels.push(breakingChangeLabel);
-    }
-    // Determine labels to remove and remove them
-    const labelsToRemove = currentLabels.filter(label => managedLabels.includes(label) && !newLabels.includes(label));
-    for (let label of labelsToRemove) {
-        await octokit.rest.issues.removeLabel({
-            owner: repo.owner,
-            repo: repo.repo,
-            issue_number: pr.number,
-            name: label
-        });
-    }
-    // Ensure new labels exist with the desired color and add them
-    for (let label of newLabels) {
-        if (!currentLabels.includes(label)) {
-            try {
-                await octokit.rest.issues.getLabel({
-                    owner: repo.owner,
-                    repo: repo.repo,
-                    name: label
-                });
-            } catch (err) {
-                // Label does not exist, create it
-                let color = generateColor(label);
-                await octokit.rest.issues.createLabel({
-                    owner: repo.owner,
-                    repo: repo.repo,
-                    name: label,
-                    color: color
-                });
-            }
-
-            // Add the label to the PR
-            await octokit.rest.issues.addLabels({
-                owner: repo.owner,
-                repo: repo.repo,
-                issue_number: pr.number,
-                labels: [label],
-            });
-        }
-    }
-}
-
-/**
- * Generates a color based on the string input.
- */
-function generateColor(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-
-    let color = '';
-    for (let i = 0; i < 3; i++) {
-        let value = (hash >> (i * 8)) & 0xFF;
-        color += ('00' + value.toString(16)).substr(-2);
-    }
-
-    return color;
-}
-
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (run);
-
-const visibleForTesting = {
-    checkConventionalCommits,
-    checkTicketNumber,
-    applyLabel,
-}
-
-__webpack_async_result__();
-} catch(e) { __webpack_async_result__(e); } }, 1);
-
-/***/ }),
-
-/***/ 1378:
-/***/ ((__webpack_module__, __unused_webpack___webpack_exports__, __nccwpck_require__) => {
-
-__nccwpck_require__.a(__webpack_module__, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
-/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2186);
-/* harmony import */ var _conventionalCommits_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(290);
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_conventionalCommits_js__WEBPACK_IMPORTED_MODULE_1__]);
-_conventionalCommits_js__WEBPACK_IMPORTED_MODULE_1__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
-
-
-
-(0,_conventionalCommits_js__WEBPACK_IMPORTED_MODULE_1__/* ["default"] */ .Z)().catch(err => (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed)(err.message));
-
-__webpack_async_result__();
-} catch(e) { __webpack_async_result__(e); } });
-
-/***/ }),
-
-/***/ 97:
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __nccwpck_require__) => {
-
-
-// EXPORTS
-__nccwpck_require__.d(__webpack_exports__, {
-  "Z": () => (/* binding */ createPreset)
-});
-
-// UNUSED EXPORTS: DEFAULT_COMMIT_TYPES
-
-;// CONCATENATED MODULE: ./node_modules/conventional-changelog-conventionalcommits/src/constants.js
-const DEFAULT_COMMIT_TYPES = Object.freeze([
-  { type: 'feat', section: 'Features' },
-  { type: 'feature', section: 'Features' },
-  { type: 'fix', section: 'Bug Fixes' },
-  { type: 'perf', section: 'Performance Improvements' },
-  { type: 'revert', section: 'Reverts' },
-  { type: 'docs', section: 'Documentation', hidden: true },
-  { type: 'style', section: 'Styles', hidden: true },
-  { type: 'chore', section: 'Miscellaneous Chores', hidden: true },
-  { type: 'refactor', section: 'Code Refactoring', hidden: true },
-  { type: 'test', section: 'Tests', hidden: true },
-  { type: 'build', section: 'Build System', hidden: true },
-  { type: 'ci', section: 'Continuous Integration', hidden: true }
-].map(Object.freeze))
-
-;// CONCATENATED MODULE: ./node_modules/conventional-changelog-conventionalcommits/src/utils.js
-const breakingHeaderPattern = /^(\w*)(?:\((.*)\))?!: (.*)$/
-
-// todo: drop, CommitParser currently handles this case
-function addBangNotes (commit) {
-  const match = commit.header.match(breakingHeaderPattern)
-  if (match && commit.notes.length === 0) {
-    const noteText = match[3] // the description of the change.
-
-    return [
-      {
-        title: 'BREAKING CHANGE',
-        text: noteText
-      }
-    ]
-  }
-
-  return commit.notes
-}
-
-;// CONCATENATED MODULE: ./node_modules/conventional-changelog-conventionalcommits/src/parser.js
-
-
-function createParserOpts (config) {
-  return {
-    headerPattern: /^(\w*)(?:\((.*)\))?!?: (.*)$/,
-    breakingHeaderPattern: breakingHeaderPattern,
-    headerCorrespondence: [
-      'type',
-      'scope',
-      'subject'
-    ],
-    noteKeywords: ['BREAKING CHANGE', 'BREAKING-CHANGE'],
-    revertPattern: /^(?:Revert|revert:)\s"?([\s\S]+?)"?\s*This reverts commit (\w*)\./i,
-    revertCorrespondence: ['header', 'hash'],
-    issuePrefixes: config?.issuePrefixes || ['#']
-  }
-}
-
-;// CONCATENATED MODULE: external "fs/promises"
-const promises_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("fs/promises");
-// EXTERNAL MODULE: external "path"
-var external_path_ = __nccwpck_require__(1017);
-// EXTERNAL MODULE: external "url"
-var external_url_ = __nccwpck_require__(7310);
-// EXTERNAL MODULE: ./node_modules/compare-func/index.js
-var compare_func = __nccwpck_require__(4623);
-;// CONCATENATED MODULE: ./node_modules/conventional-changelog-conventionalcommits/src/writer.js
-
-
-
-
-
-
-
-const dirname = (0,external_url_.fileURLToPath)(new URL(/* asset import */ __nccwpck_require__(278), __nccwpck_require__.b))
-const releaseAsRegex = /release-as:\s*\w*@?([0-9]+\.[0-9]+\.[0-9a-z]+(-[0-9a-z.]+)?)\s*/i
-/**
- * Handlebar partials for various property substitutions based on commit context.
- */
-const owner = '{{#if this.owner}}{{~this.owner}}{{else}}{{~@root.owner}}{{/if}}'
-const host = '{{~@root.host}}'
-const repository = '{{#if this.repository}}{{~this.repository}}{{else}}{{~@root.repository}}{{/if}}'
-
-async function createWriterOpts (config) {
-  const finalConfig = {
-    types: DEFAULT_COMMIT_TYPES,
-    issueUrlFormat: '{{host}}/{{owner}}/{{repository}}/issues/{{id}}',
-    commitUrlFormat: '{{host}}/{{owner}}/{{repository}}/commit/{{hash}}',
-    compareUrlFormat: '{{host}}/{{owner}}/{{repository}}/compare/{{previousTag}}...{{currentTag}}',
-    userUrlFormat: '{{host}}/{{user}}',
-    issuePrefixes: ['#'],
-    ...config
-  }
-  const commitUrlFormat = expandTemplate(finalConfig.commitUrlFormat, {
-    host,
-    owner,
-    repository
-  })
-  const compareUrlFormat = expandTemplate(finalConfig.compareUrlFormat, {
-    host,
-    owner,
-    repository
-  })
-  const issueUrlFormat = expandTemplate(finalConfig.issueUrlFormat, {
-    host,
-    owner,
-    repository,
-    id: '{{this.issue}}',
-    prefix: '{{this.prefix}}'
-  })
-
-  const [
-    template,
-    header,
-    commit,
-    footer
-  ] = await Promise.all([
-    (0,promises_namespaceObject.readFile)((0,external_path_.resolve)(dirname, './templates/template.hbs'), 'utf-8'),
-    (0,promises_namespaceObject.readFile)((0,external_path_.resolve)(dirname, './templates/header.hbs'), 'utf-8'),
-    (0,promises_namespaceObject.readFile)((0,external_path_.resolve)(dirname, './templates/commit.hbs'), 'utf-8'),
-    (0,promises_namespaceObject.readFile)((0,external_path_.resolve)(dirname, './templates/footer.hbs'), 'utf-8')
-  ])
-  const writerOpts = getWriterOpts(finalConfig)
-
-  writerOpts.mainTemplate = template
-  writerOpts.headerPartial = header
-    .replace(/{{compareUrlFormat}}/g, compareUrlFormat)
-  writerOpts.commitPartial = commit
-    .replace(/{{commitUrlFormat}}/g, commitUrlFormat)
-    .replace(/{{issueUrlFormat}}/g, issueUrlFormat)
-  writerOpts.footerPartial = footer
-
-  return writerOpts
-}
-
-function getWriterOpts (config) {
-  const commitGroupOrder = config.types.flatMap(t => t.section).filter(t => t)
-
-  return {
-    transform: (commit, context) => {
-      let discard = true
-      const issues = []
-      const entry = findTypeEntry(config.types, commit)
-
-      // adds additional breaking change notes
-      // for the special case, test(system)!: hello world, where there is
-      // a '!' but no 'BREAKING CHANGE' in body:
-      let notes = addBangNotes(commit)
-
-      // Add an entry in the CHANGELOG if special Release-As footer
-      // is used:
-      if ((commit.footer && releaseAsRegex.test(commit.footer)) ||
-          (commit.body && releaseAsRegex.test(commit.body))) {
-        discard = false
-      }
-
-      notes = notes.map(note => {
-        discard = false
-
-        return {
-          ...note,
-          title: 'BREAKING CHANGES'
-        }
-      })
-
-      // breaking changes attached to any type are still displayed.
-      if (discard && (entry === undefined ||
-          entry.hidden)) return
-
-      const type = entry
-        ? entry.section
-        : commit.type
-      const scope = commit.scope === '*'
-        ? ''
-        : commit.scope
-      const shortHash = typeof commit.hash === 'string'
-        ? commit.hash.substring(0, 7)
-        : commit.shortHash
-      let subject = commit.subject
-
-      if (typeof subject === 'string') {
-        // Issue URLs.
-        const issueRegEx = '(' + config.issuePrefixes.join('|') + ')' + '([a-z0-9]+)'
-        const re = new RegExp(issueRegEx, 'g')
-
-        subject = subject.replace(re, (_, prefix, issue) => {
-          issues.push(prefix + issue)
-          const url = expandTemplate(config.issueUrlFormat, {
-            host: context.host,
-            owner: context.owner,
-            repository: context.repository,
-            id: issue,
-            prefix
-          })
-          return `[${prefix}${issue}](${url})`
-        })
-        // User URLs.
-        subject = subject.replace(/\B@([a-z0-9](?:-?[a-z0-9/]){0,38})/g, (_, user) => {
-          // TODO: investigate why this code exists.
-          if (user.includes('/')) {
-            return `@${user}`
-          }
-
-          const usernameUrl = expandTemplate(config.userUrlFormat, {
-            host: context.host,
-            owner: context.owner,
-            repository: context.repository,
-            user
-          })
-
-          return `[@${user}](${usernameUrl})`
-        })
-      }
-
-      // remove references that already appear in the subject
-      const references = commit.references.filter(reference => !issues.includes(reference.prefix + reference.issue))
-
-      return {
-        notes,
-        type,
-        scope,
-        shortHash,
-        subject,
-        references
-      }
-    },
-    groupBy: 'type',
-    // the groupings of commit messages, e.g., Features vs., Bug Fixes, are
-    // sorted based on their probable importance:
-    commitGroupsSort: (a, b) => {
-      const gRankA = commitGroupOrder.indexOf(a.title)
-      const gRankB = commitGroupOrder.indexOf(b.title)
-      return gRankA - gRankB
-    },
-    commitsSort: ['scope', 'subject'],
-    noteGroupsSort: 'title',
-    notesSort: compare_func
-  }
-}
-
-function findTypeEntry (types, commit) {
-  const typeKey = (commit.revert ? 'revert' : (commit.type || '')).toLowerCase()
-  return types.find((entry) => {
-    if (entry.type !== typeKey) {
-      return false
-    }
-    if (entry.scope && entry.scope !== commit.scope) {
-      return false
-    }
-    return true
-  })
-}
-
-// expand on the simple mustache-style templates supported in
-// configuration (we may eventually want to use handlebars for this).
-function expandTemplate (template, context) {
-  let expanded = template
-  Object.keys(context).forEach(key => {
-    expanded = expanded.replace(new RegExp(`{{${key}}}`, 'g'), context[key])
-  })
-  return expanded
-}
-
-;// CONCATENATED MODULE: ./node_modules/conventional-changelog-conventionalcommits/src/whatBump.js
-
-
-function createWhatBump (config) {
-  return function whatBump (commits) {
-    let level = 2
-    let breakings = 0
-    let features = 0
-
-    commits.forEach(commit => {
-      // adds additional breaking change notes
-      // for the special case, test(system)!: hello world, where there is
-      // a '!' but no 'BREAKING CHANGE' in body:
-      commit.notes = addBangNotes(commit)
-      if (commit.notes.length > 0) {
-        breakings += commit.notes.length
-        level = 0
-      } else if (commit.type === 'feat' || commit.type === 'feature') {
-        features += 1
-        if (level === 2) {
-          level = 1
-        }
-      }
-    })
-
-    if (config?.preMajor && level < 2) {
-      level++
-    }
-
-    return {
-      level,
-      reason: breakings === 1
-        ? `There is ${breakings} BREAKING CHANGE and ${features} features`
-        : `There are ${breakings} BREAKING CHANGES and ${features} features`
-    }
-  }
-}
-
-;// CONCATENATED MODULE: ./node_modules/conventional-changelog-conventionalcommits/src/index.js
-
-
-
-
-
-
-
-async function createPreset (config) {
-  return {
-    commits: {
-      ignore: config?.ignoreCommits,
-      merges: false
-    },
-    parser: createParserOpts(config),
-    writer: await createWriterOpts(config),
-    whatBump: createWhatBump(config)
-  }
-}
-
-
-/***/ }),
-
-/***/ 7703:
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __nccwpck_require__) => {
-
-
-// EXPORTS
-__nccwpck_require__.d(__webpack_exports__, {
-  "Qs": () => (/* reexport */ CommitParser_CommitParser)
-});
-
-// UNUSED EXPORTS: createCommitObject, parseCommits, parseCommitsStream
-
+/***/ })
+
+/******/ });
+/************************************************************************/
+/******/ // The module cache
+/******/ var __webpack_module_cache__ = {};
+/******/ 
+/******/ // The require function
+/******/ function __nccwpck_require__(moduleId) {
+/******/ 	// Check if module is in cache
+/******/ 	var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 	if (cachedModule !== undefined) {
+/******/ 		return cachedModule.exports;
+/******/ 	}
+/******/ 	// Create a new module (and put it into the cache)
+/******/ 	var module = __webpack_module_cache__[moduleId] = {
+/******/ 		// no module.id needed
+/******/ 		// no module.loaded needed
+/******/ 		exports: {}
+/******/ 	};
+/******/ 
+/******/ 	// Execute the module function
+/******/ 	var threw = true;
+/******/ 	try {
+/******/ 		__webpack_modules__[moduleId].call(module.exports, module, module.exports, __nccwpck_require__);
+/******/ 		threw = false;
+/******/ 	} finally {
+/******/ 		if(threw) delete __webpack_module_cache__[moduleId];
+/******/ 	}
+/******/ 
+/******/ 	// Return the exports of the module
+/******/ 	return module.exports;
+/******/ }
+/******/ 
+/************************************************************************/
+/******/ /* webpack/runtime/compat */
+/******/ 
+/******/ if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = new URL('.', import.meta.url).pathname.slice(import.meta.url.match(/^file:\/\/\/\w:/) ? 1 : 0, -1) + "/";
+/******/ 
+/************************************************************************/
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
+(() => {
+
+// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
+var core = __nccwpck_require__(2186);
+// EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
+var github = __nccwpck_require__(5438);
 ;// CONCATENATED MODULE: ./node_modules/conventional-commits-parser/dist/regex.js
 const nomatchRegex = /(?!.*)/;
 function join(parts, joiner) {
@@ -32189,173 +31431,223 @@ function parseCommitsStream(options = {}) {
 
 
 //# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi9zcmMvaW5kZXgudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEsY0FBYyxZQUFZLENBQUE7QUFDMUIsY0FBYyxtQkFBbUIsQ0FBQTtBQUNqQyxjQUFjLGFBQWEsQ0FBQSJ9
+;// CONCATENATED MODULE: ./conventionalCommits.js
 
-/***/ })
 
-/******/ });
-/************************************************************************/
-/******/ // The module cache
-/******/ var __webpack_module_cache__ = {};
-/******/ 
-/******/ // The require function
-/******/ function __nccwpck_require__(moduleId) {
-/******/ 	// Check if module is in cache
-/******/ 	var cachedModule = __webpack_module_cache__[moduleId];
-/******/ 	if (cachedModule !== undefined) {
-/******/ 		return cachedModule.exports;
-/******/ 	}
-/******/ 	// Create a new module (and put it into the cache)
-/******/ 	var module = __webpack_module_cache__[moduleId] = {
-/******/ 		// no module.id needed
-/******/ 		// no module.loaded needed
-/******/ 		exports: {}
-/******/ 	};
-/******/ 
-/******/ 	// Execute the module function
-/******/ 	var threw = true;
-/******/ 	try {
-/******/ 		__webpack_modules__[moduleId].call(module.exports, module, module.exports, __nccwpck_require__);
-/******/ 		threw = false;
-/******/ 	} finally {
-/******/ 		if(threw) delete __webpack_module_cache__[moduleId];
-/******/ 	}
-/******/ 
-/******/ 	// Return the exports of the module
-/******/ 	return module.exports;
-/******/ }
-/******/ 
-/******/ // expose the modules object (__webpack_modules__)
-/******/ __nccwpck_require__.m = __webpack_modules__;
-/******/ 
-/************************************************************************/
-/******/ /* webpack/runtime/async module */
-/******/ (() => {
-/******/ 	var webpackQueues = typeof Symbol === "function" ? Symbol("webpack queues") : "__webpack_queues__";
-/******/ 	var webpackExports = typeof Symbol === "function" ? Symbol("webpack exports") : "__webpack_exports__";
-/******/ 	var webpackError = typeof Symbol === "function" ? Symbol("webpack error") : "__webpack_error__";
-/******/ 	var resolveQueue = (queue) => {
-/******/ 		if(queue && !queue.d) {
-/******/ 			queue.d = 1;
-/******/ 			queue.forEach((fn) => (fn.r--));
-/******/ 			queue.forEach((fn) => (fn.r-- ? fn.r++ : fn()));
-/******/ 		}
-/******/ 	}
-/******/ 	var wrapDeps = (deps) => (deps.map((dep) => {
-/******/ 		if(dep !== null && typeof dep === "object") {
-/******/ 			if(dep[webpackQueues]) return dep;
-/******/ 			if(dep.then) {
-/******/ 				var queue = [];
-/******/ 				queue.d = 0;
-/******/ 				dep.then((r) => {
-/******/ 					obj[webpackExports] = r;
-/******/ 					resolveQueue(queue);
-/******/ 				}, (e) => {
-/******/ 					obj[webpackError] = e;
-/******/ 					resolveQueue(queue);
-/******/ 				});
-/******/ 				var obj = {};
-/******/ 				obj[webpackQueues] = (fn) => (fn(queue));
-/******/ 				return obj;
-/******/ 			}
-/******/ 		}
-/******/ 		var ret = {};
-/******/ 		ret[webpackQueues] = x => {};
-/******/ 		ret[webpackExports] = dep;
-/******/ 		return ret;
-/******/ 	}));
-/******/ 	__nccwpck_require__.a = (module, body, hasAwait) => {
-/******/ 		var queue;
-/******/ 		hasAwait && ((queue = []).d = 1);
-/******/ 		var depQueues = new Set();
-/******/ 		var exports = module.exports;
-/******/ 		var currentDeps;
-/******/ 		var outerResolve;
-/******/ 		var reject;
-/******/ 		var promise = new Promise((resolve, rej) => {
-/******/ 			reject = rej;
-/******/ 			outerResolve = resolve;
-/******/ 		});
-/******/ 		promise[webpackExports] = exports;
-/******/ 		promise[webpackQueues] = (fn) => (queue && fn(queue), depQueues.forEach(fn), promise["catch"](x => {}));
-/******/ 		module.exports = promise;
-/******/ 		body((deps) => {
-/******/ 			currentDeps = wrapDeps(deps);
-/******/ 			var fn;
-/******/ 			var getResult = () => (currentDeps.map((d) => {
-/******/ 				if(d[webpackError]) throw d[webpackError];
-/******/ 				return d[webpackExports];
-/******/ 			}))
-/******/ 			var promise = new Promise((resolve) => {
-/******/ 				fn = () => (resolve(getResult));
-/******/ 				fn.r = 0;
-/******/ 				var fnQueue = (q) => (q !== queue && !depQueues.has(q) && (depQueues.add(q), q && !q.d && (fn.r++, q.push(fn))));
-/******/ 				currentDeps.map((dep) => (dep[webpackQueues](fnQueue)));
-/******/ 			});
-/******/ 			return fn.r ? promise : getResult();
-/******/ 		}, (err) => ((err ? reject(promise[webpackError] = err) : outerResolve(exports)), resolveQueue(queue)));
-/******/ 		queue && (queue.d = 0);
-/******/ 	};
-/******/ })();
-/******/ 
-/******/ /* webpack/runtime/define property getters */
-/******/ (() => {
-/******/ 	// define getter functions for harmony exports
-/******/ 	__nccwpck_require__.d = (exports, definition) => {
-/******/ 		for(var key in definition) {
-/******/ 			if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
-/******/ 				Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
-/******/ 			}
-/******/ 		}
-/******/ 	};
-/******/ })();
-/******/ 
-/******/ /* webpack/runtime/hasOwnProperty shorthand */
-/******/ (() => {
-/******/ 	__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
-/******/ })();
-/******/ 
-/******/ /* webpack/runtime/publicPath */
-/******/ (() => {
-/******/ 	var scriptUrl;
-/******/ 	if (typeof import.meta.url === "string") scriptUrl = import.meta.url
-/******/ 	// When supporting browsers where an automatic publicPath is not supported you must specify an output.publicPath manually via configuration
-/******/ 	// or pass an empty string ("") and set the __webpack_public_path__ variable from your code to use your own logic.
-/******/ 	if (!scriptUrl) throw new Error("Automatic publicPath is not supported in this browser");
-/******/ 	scriptUrl = scriptUrl.replace(/#.*$/, "").replace(/\?.*$/, "").replace(/\/[^\/]+$/, "/");
-/******/ 	__nccwpck_require__.p = scriptUrl;
-/******/ })();
-/******/ 
-/******/ /* webpack/runtime/compat */
-/******/ 
-/******/ if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = new URL('.', import.meta.url).pathname.slice(import.meta.url.match(/^file:\/\/\/\w:/) ? 1 : 0, -1) + "/";
-/******/ 
-/******/ /* webpack/runtime/import chunk loading */
-/******/ (() => {
-/******/ 	__nccwpck_require__.b = new URL("./", import.meta.url);
-/******/ 	
-/******/ 	// object to store loaded and loading chunks
-/******/ 	// undefined = chunk not loaded, null = chunk preloaded/prefetched
-/******/ 	// [resolve, reject, Promise] = chunk loading, 0 = chunk loaded
-/******/ 	var installedChunks = {
-/******/ 		179: 0
-/******/ 	};
-/******/ 	
-/******/ 	// no install chunk
-/******/ 	
-/******/ 	// no chunk on demand loading
-/******/ 	
-/******/ 	// no external install chunk
-/******/ 	
-/******/ 	// no on chunks loaded
-/******/ })();
-/******/ 
-/************************************************************************/
-/******/ 
-/******/ // startup
-/******/ // Load entry module and return exports
-/******/ // This entry module used 'module' so it can't be inlined
-/******/ var __webpack_exports__ = __nccwpck_require__(1378);
-/******/ __webpack_exports__ = await __webpack_exports__;
-/******/ 
+
+
+const options = {
+    headerPattern: /^(\w*)(?:\((.*)\))?!?: (.*)$/,
+    breakingHeaderPattern: /^(\w*)(?:\((.*)\))?!: (.*)$/,
+    headerCorrespondence: [
+        'type',
+        'scope',
+        'subject'
+    ],
+    noteKeywords: ['BREAKING CHANGE', 'BREAKING-CHANGE'],
+    revertPattern: /^(?:Revert|revert:)\s"?([\s\S]+?)"?\s*This reverts commit (\w*)\./i,
+    revertCorrespondence: ['header', 'hash'],
+    issuePrefixes: ['#']
+}
+
+const parser = new CommitParser_CommitParser(options);
+
+/**
+ * Main function to run the whole process.
+ */
+async function run() {
+    const commitDetail = await checkConventionalCommits();
+    await checkTicketNumber();
+    await applyLabel(github.context.repo, commitDetail);
+}
+
+
+/**
+ * Check the conventional commits of the task.
+ * Parse the title of the pull request and validate against the task type list.
+ * @returns {Promise<Object>} An object with details of the commit: type, scope and whether it's a breaking change.
+ */
+async function checkConventionalCommits() {
+    let taskTypesInput = (0,core.getInput)('task_types');
+    if (!taskTypesInput) {
+        (0,core.setFailed)('Missing required input: task_types');
+        return;
+    }
+    let taskTypeList;
+    try {
+        taskTypeList = JSON.parse(taskTypesInput);
+    } catch (err) {
+        (0,core.setFailed)('Invalid task_types input. Expecting a JSON array.');
+        return;
+    }
+
+    const pr = github.context.payload.pull_request;
+
+    if (!parser.options.headerPattern.test(pr.title)) {
+        (0,core.setFailed)(`Malformed pull request title. Must match: ${parser.options.headerPattern}`);
+        return;
+    }
+
+    const commitMessage = (pr.body == null ? pr.title : pr.title + "\n" + pr.body).trim();
+    const titleAst = parser.parse(commitMessage);
+    const cc = {
+        type: titleAst.type ? titleAst.type : '',
+        scope: titleAst.scope ? titleAst.scope : '',
+        breaking: titleAst.notes && titleAst.notes.some(note => note.title === 'BREAKING CHANGE'),
+    };
+    if (!cc.type || !taskTypeList.includes(cc.type)) {
+        (0,core.setFailed)(`Invalid or missing task type: '${cc.type}'. Must be one of: ${taskTypeList.join(', ')}`);
+        return;
+    }
+    return cc;
+}
+
+/**
+ * Check the ticket number based on the PR title and a provided regex.
+ */
+async function checkTicketNumber() {
+    const ticketKeyRegex = (0,core.getInput)('ticket_key_regex');
+    if (ticketKeyRegex) {
+        const pr = github.context.payload.pull_request;
+        const taskNumberMatch = pr.title.match(new RegExp(ticketKeyRegex));
+        const taskNumber = taskNumberMatch ? taskNumberMatch[0] : '';
+        if (!taskNumber) {
+            (0,core.setFailed)(`Invalid or missing task number: '${taskNumber}'. Must match: ${ticketKeyRegex}`);
+        }
+    }
+}
+/**
+ * Apply labels to the pull request based on the details of the commit and any custom labels provided.
+ * @param {Object} repo Repository details.
+ * @param {Object} commitDetail The object with details of the commit.
+ */
+async function applyLabel(repo, commitDetail) {
+    const addLabel = (0,core.getInput)('add_label');
+    if (addLabel !== undefined && addLabel.toLowerCase() === 'false') {
+        return;
+    }
+    const customLabelsInput = (0,core.getInput)('custom_labels');
+    let customLabels = {};
+    if (customLabelsInput) {
+        try {
+            customLabels = JSON.parse(customLabelsInput);
+            // Validate that customLabels is an object and all its keys and values are strings
+            if (typeof customLabels !== 'object' || Array.isArray(customLabels) || Object.entries(customLabels).some(([k, v]) => typeof k !== 'string' || typeof v !== 'string')) {
+                (0,core.setFailed)('Invalid custom_labels input. Expecting a JSON object with string keys and values.');
+                return;
+            }
+        } catch (err) {
+            (0,core.setFailed)('Invalid custom_labels input. Unable to parse JSON.');
+            return;
+        }
+    }
+    await updateLabels(repo, commitDetail, customLabels);
+}
+
+/**
+ * Update labels on the pull request.
+ * @param {Object} repo Repository details.
+ * @param {Object} commitDetail The object with details of the commit.
+ * @param {Object} customLabels Custom label mapping.
+ */
+async function updateLabels(repo, commitDetail, customLabels) {
+    const pr = github.context.payload.pull_request;
+    const token = (0,core.getInput)('token');
+    const octokit = (0,github.getOctokit)(token);
+    const currentLabelsResult = await octokit.rest.issues.listLabelsOnIssue({
+        owner: repo.owner,
+        repo: repo.repo,
+        issue_number: pr.number
+    });
+    const currentLabels = currentLabelsResult.data.map(label => label.name);
+    let taskTypesInput = (0,core.getInput)('task_types');
+    let taskTypeList = JSON.parse(taskTypesInput);
+    const managedLabels = taskTypeList.concat(['breaking change']);
+    // Include customLabels keys in managedLabels, if any
+    Object.values(customLabels).forEach(label => {
+        if (!managedLabels.includes(label)) {
+            managedLabels.push(label);
+        }
+    });
+    let newLabels = [customLabels[commitDetail.type] ? customLabels[commitDetail.type] : commitDetail.type];
+    const breakingChangeLabel = 'breaking change';
+    if (commitDetail.breaking && !newLabels.includes(breakingChangeLabel)) {
+        newLabels.push(breakingChangeLabel);
+    }
+    // Determine labels to remove and remove them
+    const labelsToRemove = currentLabels.filter(label => managedLabels.includes(label) && !newLabels.includes(label));
+    for (let label of labelsToRemove) {
+        await octokit.rest.issues.removeLabel({
+            owner: repo.owner,
+            repo: repo.repo,
+            issue_number: pr.number,
+            name: label
+        });
+    }
+    // Ensure new labels exist with the desired color and add them
+    for (let label of newLabels) {
+        if (!currentLabels.includes(label)) {
+            try {
+                await octokit.rest.issues.getLabel({
+                    owner: repo.owner,
+                    repo: repo.repo,
+                    name: label
+                });
+            } catch (err) {
+                // Label does not exist, create it
+                let color = generateColor(label);
+                await octokit.rest.issues.createLabel({
+                    owner: repo.owner,
+                    repo: repo.repo,
+                    name: label,
+                    color: color
+                });
+            }
+
+            // Add the label to the PR
+            await octokit.rest.issues.addLabels({
+                owner: repo.owner,
+                repo: repo.repo,
+                issue_number: pr.number,
+                labels: [label],
+            });
+        }
+    }
+}
+
+/**
+ * Generates a color based on the string input.
+ */
+function generateColor(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+
+    let color = '';
+    for (let i = 0; i < 3; i++) {
+        let value = (hash >> (i * 8)) & 0xFF;
+        color += ('00' + value.toString(16)).substr(-2);
+    }
+
+    return color;
+}
+
+/* harmony default export */ const conventionalCommits = (run);
+
+const visibleForTesting = {
+    checkConventionalCommits,
+    checkTicketNumber,
+    applyLabel,
+}
+
+;// CONCATENATED MODULE: ./index.js
+
+
+
+conventionalCommits().catch(err => (0,core.setFailed)(err.message));
+
+})();
+
 
 //# sourceMappingURL=index.js.map

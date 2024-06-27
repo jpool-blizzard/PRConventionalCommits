@@ -1,10 +1,22 @@
 import { getInput, setFailed } from '@actions/core';
 import { getOctokit, context } from '@actions/github';
 import { CommitParser } from 'conventional-commits-parser'
-import createPreset from 'conventional-changelog-conventionalcommits';
 
-const options = await createPreset();
-const parser = new CommitParser(options.parser);
+const options = {
+    headerPattern: /^(\w*)(?:\((.*)\))?!?: (.*)$/,
+    breakingHeaderPattern: /^(\w*)(?:\((.*)\))?!: (.*)$/,
+    headerCorrespondence: [
+        'type',
+        'scope',
+        'subject'
+    ],
+    noteKeywords: ['BREAKING CHANGE', 'BREAKING-CHANGE'],
+    revertPattern: /^(?:Revert|revert:)\s"?([\s\S]+?)"?\s*This reverts commit (\w*)\./i,
+    revertCorrespondence: ['header', 'hash'],
+    issuePrefixes: ['#']
+}
+
+const parser = new CommitParser(options);
 
 /**
  * Main function to run the whole process.
